@@ -54,7 +54,7 @@ uint64_t addrpml4(uint64_t a) {
     cr3 >>= 12;
     cr3 <<= 12;
     cr3 |= (a & 0xfff);
-    return cr3;
+    return cr3 & 0xfffffffffull;
 }
 
 uint64_t addrpdpt(uint64_t a) {
@@ -63,7 +63,8 @@ uint64_t addrpdpt(uint64_t a) {
     pml4 <<= 12;
     a = cut(a, 38, 30);
     a <<= 3;
-    return pml4 | (a & 0xfff);
+    pml4 |= (a & 0xfff);
+    return pml4 & 0xfffffffffull;
 }
 
 uint64_t addrpd(uint64_t a) {
@@ -72,7 +73,8 @@ uint64_t addrpd(uint64_t a) {
     pdpt <<= 12;
     a = cut(a, 29, 21);
     a <<= 3;
-    return pdpt | (a & 0xfff);
+    pdpt |= (a & 0xfff);
+    return pdpt & 0xfffffffffull;
 }
 
 uint64_t addrpt(uint64_t a) {
@@ -81,7 +83,8 @@ uint64_t addrpt(uint64_t a) {
     pd <<= 12;
     a = cut(a, 20, 12);
     a <<= 3;
-    return pd | (a & 0xfff);
+    pd |= (a & 0xfff);
+    return pd & 0xfffffffffull;
 }
 
 int main() {
@@ -104,10 +107,10 @@ int main() {
     // ------------------------------------------------
     // Modify page table entry of y
     uint64_t yAddrPt = addrpt((uint64_t)y);
-	uint64_t oldYValPt = read_physical_address(yAddrPt);
+    uint64_t oldYValPt = read_physical_address(yAddrPt);
     uint64_t xAddrPt = addrpt((uint64_t)x);
-	uint64_t xValPt = read_physical_address(xAddrPt);
-	write_physical_address(yAddrPt, xValPt);
+    uint64_t xValPt = read_physical_address(xAddrPt);
+    write_physical_address(yAddrPt, xValPt);
 
     // Let y point to x's physical address
     // ------------------------------------------------
@@ -130,7 +133,7 @@ int main() {
     // Recover page table entry of y
     // Let y point to its original address
     // You may need to store y's original address at previous step
-	write_physical_address(yAddrPt, oldYValPt);
+    write_physical_address(yAddrPt, oldYValPt);
     // ------------------------------------------------
 
     getchar();
